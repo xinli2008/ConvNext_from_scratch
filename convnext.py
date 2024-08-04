@@ -20,8 +20,10 @@ class Block(nn.Module):
         # -------------------------------------------------------------------------------
         # 这里的groups的作用是什么？
         # 在pytorch中的nn.conv2d中, groups参数决定了卷积层的分组形式。具体来说, 他控制输入通道和输出通道之间的连接方式。
-        # 1、默认值为1：
-        # 2、
+        # 1、默认值为1：当groups = 1时, 卷积层是标准的卷积, 每个输入通道和每个输出通道都是连接的。
+        # 2、全分组卷积：当groups等于输入通道数的时候, 卷积层就变成了深度可分离卷积(depthwise convoltuion)。在这种情况下, 每个输入通道仅和一个对应的输出通道相连。
+        # 每个通道独立的进行卷积操作。
+        # 3、部分分组卷积：当groups是其他值的时候, 表示将输入通道和输出通道分为groups组, 每组独立进行卷积。
         self.dwconv = nn.Conv2d(dim, dim, kernel_size = 7, padding = 3, groups = dim)  # depthwise conv
         self.norm = nn.LayerNorm(dim, eps = 1e-6)
         self.pwconv1 = nn.Linear(dim, 4 * dim)
