@@ -21,8 +21,7 @@ class Block(nn.Module):
         # 这里的groups的作用是什么？
         # 在pytorch中的nn.conv2d中, groups参数决定了卷积层的分组形式。具体来说, 他控制输入通道和输出通道之间的连接方式。
         # 1、默认值为1：当groups = 1时, 卷积层是标准的卷积, 每个输入通道和每个输出通道都是连接的。
-        # 2、全分组卷积：当groups等于输入通道数的时候, 卷积层就变成了深度可分离卷积(depthwise convoltuion)。在这种情况下, 每个输入通道仅和一个对应的输出通道相连。
-        # 每个通道独立的进行卷积操作。
+        # 2、全分组卷积：当groups等于输入通道数的时候, 卷积层就变成了深度可分离卷积(depthwise convoltuion)。在这种情况下, 每个输入通道仅和一个对应的输出通道相连。每个通道独立的进行卷积操作。
         # 3、部分分组卷积：当groups是其他值的时候, 表示将输入通道和输出通道分为groups组, 每组独立进行卷积。
         self.dwconv = nn.Conv2d(dim, dim, kernel_size = 7, padding = 3, groups = dim)  # depthwise conv
         self.norm = nn.LayerNorm(dim, eps = 1e-6)
@@ -40,6 +39,14 @@ class Block(nn.Module):
         # DropPath:
         # - droppath的基本思想是随机"丢弃"整个残差块或路径, 而不仅仅是单个神经元。
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
+
+        # -------------------------------------------------------------------------------
+        # 在深度学习中, 除了dropout和droppath, 还有哪些方法可以解决过拟合的问题？
+        # 首先, 过拟合问题是指一个模型在训练数据上表现比较好, 但是在没有见过的测试数据或者新数据上表现很差的现象。也就是说, 模型在训练数据上学习了太多的细节和噪声。
+        # 解决过拟合问题的方式有：
+        # 1、增加训练数据, 让数据的多样性足够的多, 可以让模型学习到足够的特征, 减少过拟合的风险。
+        # 2、L1正则化和L2正则化, 他们都是在模型的损失函数加入正则化项来限制模型的复杂度。具体来说, L1正则化是在损失函数中添加权重绝对值之和, 而L2正则化是在损失函数中添加权重平方和。
+        # 3、dropout和droppath, 随机杀死部分神经元, 从而可以有效的防止网络过分的依赖特定的神经元。
 
     def forward(self, x):
         input = x
@@ -230,4 +237,4 @@ if __name__ == "__main__":
     model = convnext_tiny()
     input_tensor = torch.randn([1, 3, 224, 224])
     output_tensor = model(input_tensor)
-    pass
+    print(output_tensor.shape)
